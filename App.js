@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Button} from 'react-native';
+import { Picker, Text, View, Button, TextInput} from 'react-native';
 import {createStackNavigator, createAppContainer} from 'react-navigation';
 import * as d3 from 'd3'
 import { ART } from 'react-native'
@@ -9,15 +9,26 @@ class SignIn extends Component {
   constructor(props){
     super(props)
     this.state = {
-      username : 'testname',
-      password : 'testpassword'
+      username : 'username',
+      password : 'password'
     }
 
   }
   render(){
     return (
-       <View style={{flex: 1, backgroundColor: '#14c424', justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={{fontSize: 60, color: 'black', paddingBottom: 250}}>Budget Buddy</Text>
+       <View style={{flex: 1, backgroundColor: '#14c424', alignItems: 'center'}}>
+        <Text style={{fontSize: 60, color: 'black', paddingTop: -250}}>Budget Buddy</Text>
+        <TextInput
+          style={{width: 250, height: 40, borderColor: 'gray', borderWidth: 2, borderRadius: 3}}
+          onChangeText={(text) => this.setState({username : text})}
+          value={this.state.username}
+        />
+        <TextInput
+          style={{alignItems: 'center', width: 250, height: 40, borderColor: 'gray', borderWidth: 2, borderRadius: 3}}
+          onChangeText={(text) => this.setState({password : text})}
+          value={this.state.password}
+          clearTextOnFocus={true}
+        />
         <Button onPress={() => this.props.navigation.navigate('Details', {
           username : this.state.username,
           password : this.state.password
@@ -63,9 +74,17 @@ class DetailsScreen extends React.Component {
       }]
     }
     this.getColor = this.getColor.bind(this);
+    this.updatePurchases = this.updatePurchases.bind(this);
   }
+
   getColor = (index) => {
     return this.state.color[index];
+  }
+
+  updatePurchases = (obj) => {
+    let arr = this.state.userPurchases;
+    arr.push(obj);
+    this.setState({userPurchases : arr});
   }
 
   componentDidMount(props) {
@@ -98,7 +117,10 @@ class DetailsScreen extends React.Component {
           }  
           </Group>
         </Surface>
-        <Button onPress={() => this.props.navigation.navigate('Add')} title="Add Expenses" style={{fontSize: 30}} color="black"/>
+        <Button onPress={() => this.props.navigation.navigate('Add',  {
+          current : this.state.userPurchases,
+          change : this.updatePurchases
+        })} title="Add Expenses" style={{fontSize: 30}} color="black"/>
         <Button onPress={() => this.props.navigation.navigate('Remove')} title="Remove Expenses" style={{fontSize: 30}} color="black"/>
         <Button onPress={() => this.props.navigation.navigate('Settings')} title="Settings" style={{fontSize: 30}} color="black"/>
       </View>
@@ -107,10 +129,47 @@ class DetailsScreen extends React.Component {
 }
 
 class Add extends React.Component {
+  constructor(props){
+    super(props)
+    this.state = {
+      current : []
+    }
+  }
+
+  componentDidMount(props) {
+    const { navigation } = this.props;
+    this.setState({
+      current : navigation.getParam('current'),
+      change : navigation.getParam('change'),
+      expense : '',
+      newCategory : 'Please enter new text'
+    })
+  }
+
   render() {
     return (
       <View style={{flex: 1, backgroundColor: '#14c424', justifyContent: 'center', alignItems: 'center'}}>
-        <Text>Add Screen</Text>
+        {this.state.current.map((expense, key) => (
+          <Text key={key}>
+            {expense.itemName} {expense.price}
+          </Text>
+        ))}
+        <Picker
+          selectedValue={this.state.expense}
+          style={{height: 50, width: 400}}
+          onValueChange={(itemValue, itemIndex) =>
+            this.setState({expense: itemValue})
+          }>
+          {this.state.current.map((expense, key) => (
+            <Picker.Item key={key} label={expense.itemName} value={expense.itemName} />
+          ))}
+        </Picker>
+        <TextInput
+          style={{alignItems: 'center', width: 250, height: 40, borderColor: 'gray', borderWidth: 2, borderRadius: 3}}
+          onChangeText={(text) => this.setState({newCategory : text})}
+          value={this.state.newCategory}
+          clearTextOnFocus={true}
+        />
       </View>
     );
   }
