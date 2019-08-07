@@ -6,27 +6,33 @@ import { ART } from 'react-native'
 const { Surface, Group, Shape } = ART
 
 class SignIn extends Component {
+  constructor(props){
+    super(props)
+    this.state = {
+      username : 'testname',
+      password : 'testpassword'
+    }
+
+  }
   render(){
     return (
        <View style={{flex: 1, backgroundColor: '#14c424', justifyContent: 'center', alignItems: 'center'}}>
         <Text style={{fontSize: 60, color: 'black', paddingBottom: 250}}>Budget Buddy</Text>
-        <Button onPress={() => this.props.navigation.navigate('Details')} title="Sign in" style={{fontSize: 30}} color="black"/>
+        <Button onPress={() => this.props.navigation.navigate('Details', {
+          username : this.state.username,
+          password : this.state.password
+        })} title="Sign in" style={{fontSize: 30}} color="black"/>
       </View>
     );
   }
 }
 
 class DetailsScreen extends React.Component {
-  super(props){
-    constructor(props)
+  constructor(props){
+    super(props);
     this.state = {
-      userPurchases : []
-    }
-  }
-  render() {
-    const width = 450
-    const height = 450
-    const userPurchases = [
+      color: ['blue', 'red', 'green', 'yellow', 'orange', 'white', 'black'],
+      userPurchases : [      
       {
         itemName: 'Mountain Dew',
         price: 3
@@ -54,22 +60,38 @@ class DetailsScreen extends React.Component {
       {
         itemName: 'Wine',
         price: 16
-      }
-    ]
-    const sectionAngles = d3.pie().value(d => d.price)(userPurchases)
+      }]
+    }
+    this.getColor = this.getColor.bind(this);
+  }
+  getColor = (index) => {
+    return this.state.color[index];
+  }
+
+  componentDidMount(props) {
+    const { navigation } = this.props;
+    this.setState({
+      username : navigation.getParam('username', 'username'),
+      password : navigation.getParam('password', 'password')
+    })
+  }
+  render() {
+    const width = 450
+    const height = 450
+    const sectionAngles = d3.pie().value(d => d.price)(this.state.userPurchases)
     const path = d3.arc().outerRadius(150).padAngle(.05).innerRadius(100)
     return (
       <View style={{flex: 1, backgroundColor: '#14c424', justifyContent: 'center', alignItems: 'center'}}>
-        <Text>Expense Ratio</Text>
+        <Text>Expense Ratio {this.state.username}</Text>
         <Surface width={width} height={height}>
           <Group x={width/2} y={height/2}>
           {
-            sectionAngles.map((section, i) => (
+            sectionAngles.map((section, index) => (
               <Shape
                 key={section.index}
                 d={path(section)}
                 stroke="#000"
-                fill={`rgb(0,0,255)`}
+                fill={this.getColor(index)}
                 strokeWidth={1}
               />
             ))
