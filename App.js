@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Picker, Text, View, Button, TextInput} from 'react-native';
+import { StyleSheet, Picker, Text, View, Button, TextInput} from 'react-native';
 import {createStackNavigator, createAppContainer} from 'react-navigation';
 import * as d3 from 'd3'
 import { ART } from 'react-native'
@@ -16,17 +16,19 @@ class SignIn extends Component {
   }
   render(){
     return (
-       <View style={{flex: 1, backgroundColor: '#14c424', alignItems: 'center'}}>
+       <View style={{flex: 1, backgroundColor: '#e2e3e2', alignItems: 'center'}}>
         <Text style={{fontSize: 60, color: 'black', paddingTop: -250}}>Budget Buddy</Text>
         <TextInput
-          style={{width: 250, height: 40, borderColor: 'gray', borderWidth: 2, borderRadius: 3}}
+          style={styles.TextInputStyle}
           onChangeText={(text) => this.setState({username : text})}
-          value={this.state.username}
+          placeholder={'username'}
+          placeholderTextColor={'black'}
         />
         <TextInput
-          style={{alignItems: 'center', width: 250, height: 40, borderColor: 'gray', borderWidth: 2, borderRadius: 3}}
+          style={styles.TextInputStyle}
           onChangeText={(text) => this.setState({password : text})}
-          value={this.state.password}
+          placeholder={'password'}
+          placeholderTextColor={'black'}
           clearTextOnFocus={true}
         />
         <Button onPress={() => this.props.navigation.navigate('Details', {
@@ -75,6 +77,7 @@ class DetailsScreen extends React.Component {
     }
     this.getColor = this.getColor.bind(this);
     this.updateCategories = this.updateCategories.bind(this);
+    this.updateValue = this.updateValue.bind(this);
   }
 
   getColor = (index) => {
@@ -89,7 +92,7 @@ class DetailsScreen extends React.Component {
         inArr = true;
       }
     }
-    if(!inArr){
+    if(!inArr && obj.itemName){
       arr.push(obj);
       this.setState({userPurchases : arr});
     }
@@ -104,7 +107,8 @@ class DetailsScreen extends React.Component {
         break;
       }
     }
-    arr[i][price] += value;
+    let newVal = Number(value) + Number(arr[index].price)
+    arr[index].price = newVal;
     this.setState({userPurchases : arr})
   }
 
@@ -122,7 +126,7 @@ class DetailsScreen extends React.Component {
     const sectionAngles = d3.pie().value(d => d.price)(this.state.userPurchases)
     const path = d3.arc().outerRadius(150).padAngle(.05).innerRadius(100)
     return (
-      <View style={{flex: 1, backgroundColor: '#14c424', justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{flex: 1, backgroundColor: '#e2e3e2', justifyContent: 'center', alignItems: 'center'}}>
         <Text>Expense Ratio {this.state.username}</Text>
         <Surface width={width} height={height}>
           <Group x={width/2} y={height/2}>
@@ -141,7 +145,8 @@ class DetailsScreen extends React.Component {
         </Surface>
         <Button onPress={() => this.props.navigation.navigate('Add',  {
           current : this.state.userPurchases,
-          change : this.updateCategories
+          change : this.updateCategories,
+          value : this.updateValue
         })} title="Add Expenses" style={{fontSize: 30}} color="black"/>
         <Button onPress={() => this.props.navigation.navigate('Remove')} title="Remove Expenses" style={{fontSize: 30}} color="black"/>
         <Button onPress={() => this.props.navigation.navigate('Settings')} title="Settings" style={{fontSize: 30}} color="black"/>
@@ -155,7 +160,8 @@ class Add extends React.Component {
     super(props)
     this.state = {
       current : [],
-      change : x => x
+      change : x => x,
+      
     }
   }
 
@@ -164,19 +170,26 @@ class Add extends React.Component {
     this.setState({
       current : navigation.getParam('current'),
       change : navigation.getParam('change'),
+      changeVal : navigation.getParam('value'),
       expense : '',
-      newCategory : 'Please enter new text'
+      newCategory : '',
+      value: 0
     })
   }
 
   render() {
     return (
-      <View style={{flex: 1, backgroundColor: '#14c424', justifyContent: 'center', alignItems: 'center'}}>
-        {this.state.current.map((expense, key) => (
-          <Text key={key}>
-            {expense.itemName} {expense.price}
-          </Text>
-        ))}
+      <View style={{flex: 1, backgroundColor: '#e2e3e2', justifyContent: 'center', alignItems: 'center'}}>
+        <TextInput
+          style={styles.TextInputStyle}
+          onChangeText={(text) => this.setState({newCategory : text})}
+          placeholder={'add a category'}
+          placeholderTextColor={'black'}
+        />
+        <Button onPress={() => {
+          this.state.change({itemName : this.state.newCategory, price : 0});
+          this.forceUpdate()
+          }} title="Add Category" style={{fontSize: 30}} color="black"/>
         <Picker
           selectedValue={this.state.expense}
           style={{height: 50, width: 400}}
@@ -187,15 +200,22 @@ class Add extends React.Component {
             <Picker.Item key={key} label={expense.itemName} value={expense.itemName} />
           ))}
         </Picker>
-        <TextInput
-          style={{alignItems: 'center', width: 250, height: 40, borderColor: 'gray', borderWidth: 2, borderRadius: 3}}
-          onChangeText={(text) => this.setState({newCategory : text})}
-          value={this.state.newCategory}
+        <TextInput proptype='number'
+          style={styles.TextInputStyle}
+          onChangeText={(text) => this.setState({value : text})}
+          placeholder={'please enter expense amount'}
+          placeholderTextColor={'black'}
+          keyboardType={'numeric'}
         />
         <Button onPress={() => {
-          this.state.change({itemName : this.state.newCategory, price : 0});
+          this.state.changeVal(this.state.expense, this.state.value);
           this.forceUpdate()
-          }} title="Add Category" style={{fontSize: 30}} color="black"/>
+          }} title="Add Expense" style={{fontSize: 30}} color="black"/>
+        {this.state.current.map((expense, key) => (
+          <Text key={key}>
+            {expense.itemName} {expense.price}
+          </Text>
+        ))}
       </View>
     );
   }
@@ -204,7 +224,7 @@ class Add extends React.Component {
 class Remove extends React.Component {
   render() {
     return (
-      <View style={{flex: 1, backgroundColor: '#14c424', justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{flex: 1, backgroundColor: '#e2e3e2', justifyContent: 'center', alignItems: 'center'}}>
         <Text>Remove Screen</Text>
       </View>
     );
@@ -214,7 +234,7 @@ class Remove extends React.Component {
 class Settings extends React.Component {
   render() {
     return (
-      <View style={{flex: 1, backgroundColor: '#14c424', justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{flex: 1, backgroundColor: '#e2e3e2', justifyContent: 'center', alignItems: 'center'}}>
         <Text>Settings Screen</Text>
       </View>
     );
@@ -241,3 +261,25 @@ export default class App extends React.Component {
     return <AppContainer />;
   }
 }
+
+const styles = StyleSheet.create({  
+  container: {  
+    flex: 1,  
+    justifyContent: 'center',  
+},  
+  headerText: {  
+    fontSize: 20,  
+    textAlign: "center",  
+    margin: 10,  
+    fontWeight: "bold"  
+},  
+TextInputStyle: {  
+    textAlign: 'center',  
+    height: 40,  
+    borderRadius: 10,  
+    borderWidth: 2,  
+    borderColor: '#009688',  
+    marginBottom: 10,  
+    width: 300
+}  
+});
