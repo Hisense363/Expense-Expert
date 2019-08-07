@@ -74,17 +74,38 @@ class DetailsScreen extends React.Component {
       }]
     }
     this.getColor = this.getColor.bind(this);
-    this.updatePurchases = this.updatePurchases.bind(this);
+    this.updateCategories = this.updateCategories.bind(this);
   }
 
   getColor = (index) => {
     return this.state.color[index];
   }
 
-  updatePurchases = (obj) => {
+  updateCategories = (obj) => {
     let arr = this.state.userPurchases;
-    arr.push(obj);
-    this.setState({userPurchases : arr});
+    let inArr = false;
+    for(let i = 0; i < arr.length; i++){
+      if(arr[i].itemName === obj.itemName){
+        inArr = true;
+      }
+    }
+    if(!inArr){
+      arr.push(obj);
+      this.setState({userPurchases : arr});
+    }
+  }
+
+  updateValue = (name, value) => {
+    let index = 0;
+    let arr = this.state.userPurchases;
+    for(let i = 0; i < arr.length; i++){
+      if(arr[i].itemName === name){
+        index = i;
+        break;
+      }
+    }
+    arr[i][price] += value;
+    this.setState({userPurchases : arr})
   }
 
   componentDidMount(props) {
@@ -94,6 +115,7 @@ class DetailsScreen extends React.Component {
       password : navigation.getParam('password', 'password')
     })
   }
+
   render() {
     const width = 450
     const height = 450
@@ -119,7 +141,7 @@ class DetailsScreen extends React.Component {
         </Surface>
         <Button onPress={() => this.props.navigation.navigate('Add',  {
           current : this.state.userPurchases,
-          change : this.updatePurchases
+          change : this.updateCategories
         })} title="Add Expenses" style={{fontSize: 30}} color="black"/>
         <Button onPress={() => this.props.navigation.navigate('Remove')} title="Remove Expenses" style={{fontSize: 30}} color="black"/>
         <Button onPress={() => this.props.navigation.navigate('Settings')} title="Settings" style={{fontSize: 30}} color="black"/>
@@ -132,7 +154,8 @@ class Add extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      current : []
+      current : [],
+      change : x => x
     }
   }
 
@@ -168,8 +191,11 @@ class Add extends React.Component {
           style={{alignItems: 'center', width: 250, height: 40, borderColor: 'gray', borderWidth: 2, borderRadius: 3}}
           onChangeText={(text) => this.setState({newCategory : text})}
           value={this.state.newCategory}
-          clearTextOnFocus={true}
         />
+        <Button onPress={() => {
+          this.state.change({itemName : this.state.newCategory, price : 0});
+          this.forceUpdate()
+          }} title="Add Category" style={{fontSize: 30}} color="black"/>
       </View>
     );
   }
