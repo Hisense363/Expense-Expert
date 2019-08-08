@@ -173,8 +173,7 @@ class DetailsScreen extends React.Component {
     const sectionAngles = d3.pie().value(d => d.price)(this.state.userPurchases)
     const path = d3.arc().outerRadius(150).padAngle(.05).innerRadius(100)
     return (
-      <View style={{flex: 1, backgroundColor: '#e2e3e2', justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={{fontSize: 35}}>{this.state.username}'s Expenses</Text>
+      <View style={{flex: 1, backgroundColor: '#e2e3e2', alignItems: 'center'}}>
         <Surface width={width} height={height}>
           <Group x={width/2} y={height/2}>
           {
@@ -190,24 +189,34 @@ class DetailsScreen extends React.Component {
           }  
           </Group>
         </Surface>
+        <View style={{position: 'absolute', bottom: "12%", backgroundColor: 'darkgrey', width: 150, height: 175, justifyContent: 'center', borderWidth: 3, borderRadius: 5}}>
         {this.state.userPurchases.map((expense, key) => (
-          <Text style={{color: this.state.color[key]}} key={key}>
-            {expense.itemName} {expense.price}
+          <Text style={{color: this.state.color[key], paddingLeft: 5}} key={key}>
+            {expense.itemName} - ${expense.price}
           </Text>
         ))}
-        <Button onPress={() => this.props.navigation.navigate('Add',  {
-          current : this.state.userPurchases,
-          change : this.updateCategories,
-          value : this.updateValue,
-          color : this.state.color
-        })} title="Add Expenses" style={{fontSize: 30}} color="black"/>
-        <Button onPress={() => this.props.navigation.navigate('Remove', {
-          current : this.state.userPurchases,
-          change : this.removeCategories,
-          value: this.removeValue,
-          color : this.state.color
-        })} title="Remove Expenses" style={{fontSize: 30}} color="black"/>
-        <Button onPress={() => this.props.navigation.navigate('Settings')} title="Settings" style={{fontSize: 30}} color="black"/>
+        </View>
+        <View style={{flex: 1, flexDirection: 'row', position: 'absolute', bottom: 0}}>
+          <View style={{width: '33%', backgroundColor: 'black'}}>
+            <Button onPress={() => this.props.navigation.navigate('Add',  {
+              current : this.state.userPurchases,
+              change : this.updateCategories,
+              value : this.updateValue,
+              color : this.state.color
+            })} title="Add Expenses" color="black" style={{height : 50}}/>
+          </View>
+          <View style={{width: '34%', backgroundColor: 'black'}}>
+            <Button onPress={() => this.props.navigation.navigate('Remove', {
+              current : this.state.userPurchases,
+              change : this.removeCategories,
+              value: this.removeValue,
+              color : this.state.color
+            })} title="Remove Expenses" color="black"/>
+          </View>
+          <View style={{width: '33%', backgroundColor: 'black'}}>
+            <Button onPress={() => this.props.navigation.navigate('Settings')} title="Settings" color="black"/>
+          </View>             
+        </View>
       </View>
     );
   }
@@ -282,11 +291,6 @@ class Add extends React.Component {
           this.state.changeVal(this.state.expense, this.state.value);
           this.forceUpdate()
           }} title="Add Expense" style={{fontSize: 30}} color="black"/>
-        {this.state.current.map((expense, key) => (
-          <Text style={{color: this.state.color[key]}} key={key}>
-            {expense.itemName} {expense.price}
-          </Text>
-        ))}
       </View>
     );
   }
@@ -329,11 +333,15 @@ class Remove extends React.Component {
   render() {
     return (
       <View style={{flex: 1, backgroundColor: '#e2e3e2', justifyContent: 'center', alignItems: 'center'}}>
+        <Text>
+          Select a Category to edit
+        </Text>
         <Picker
           selectedValue={this.state.expense}
-          style={{height: 50, width: 400}}
-          onValueChange={(itemValue, itemIndex) =>
+          style={{height: 50, width: 400, paddingBottom: 20}}
+          onValueChange={(itemValue, itemIndex) => {
             this.setState({expense: itemValue})
+          }
           }>
           {this.state.current.map((expense, key) => (
             <Picker.Item key={key} label={expense.itemName} value={expense.itemName} />
@@ -341,7 +349,10 @@ class Remove extends React.Component {
         </Picker>
         <Button onPress={() => {
           this.state.change(this.state.expense)
-        }} title="Remove Category" style={{fontSize: 30}} color="black"/>
+        }} title="Remove Category" color="black"/>
+        <Text style={{paddingTop : 20, paddingBottom: 10}}>
+          Enter an amount to reduce
+        </Text>
         <TextInput proptype='number'
           style={styles.TextInputStyle}
           onChangeText={(text) => this.setState({value : text})}
@@ -352,12 +363,7 @@ class Remove extends React.Component {
         <Button onPress={() => {
           this.state.changeVal(this.state.expense, this.state.value);
           this.forceUpdate()
-          }} title="Add Expense" style={{fontSize: 30}} color="black"/>
-        {this.state.current.map((expense, key) => (
-          <Text style={{color: this.state.color[key]}} key={key}>
-            {expense.itemName} {expense.price}
-          </Text>
-        ))}
+          }} title="Reduce Expense" style={{fontSize: 30}} color="black"/>
       </View>
     );
   }
