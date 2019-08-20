@@ -1,2 +1,2 @@
-# Budget-Buddy
-A React Native budget app
+# Expense Expert
+A React Native expense tracking app
