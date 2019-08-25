@@ -12,6 +12,8 @@
     "art": "^0.10.3",
     "d3": "^5.9.7",
     "expo": "^34.0.1",
+    "mongodb-stitch-react-native-sdk": "^4.5.0",
+    "mongodb-stitch-react-native-services-mongodb-remote": "^4.5.0",
     "react": "16.8.3",
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-34.0.0.tar.gz",
